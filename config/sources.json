@@ -1,0 +1,25 @@
+[
+  { "id": "fiercepharma", "name": "FiercePharma", "url": "https://www.fiercepharma.com/rss/xml", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "fiercebiotech", "name": "FierceBiotech", "url": "https://www.fiercebiotech.com/rss/xml", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "endpoints-news", "name": "Endpoints News", "url": "https://endpoints.news/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": false, "notes": "Excluded: robots.txt explicitly disallows anthropic-ai/Claude-Web/ClaudeBot. Also returns HTTP 403 to a non-browser User-Agent." },
+  { "id": "biospace", "name": "BioSpace", "url": "https://www.biospace.com/index.rss", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "biopharmadive", "name": "BioPharma Dive", "url": "https://www.biopharmadive.com/feeds/news/", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "genengnews", "name": "GEN - Genetic Engineering & Biotechnology News", "url": "https://www.genengnews.com/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": false, "notes": "Excluded: robots.txt explicitly disallows anthropic-ai and Claude-Web." },
+  { "id": "medcitynews", "name": "MedCity News", "url": "https://medcitynews.com/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "pharmatimes", "name": "PharmaTimes", "url": "https://pharmatimes.com/feed/", "type": "rss", "region": "United Kingdom", "category": "news", "isActive": true },
+  { "id": "pmlive", "name": "PMLiVE", "url": "https://pmlive.com/feed/", "type": "rss", "region": "United Kingdom", "category": "news", "isActive": true },
+  { "id": "pharmaceutical-technology", "name": "Pharmaceutical Technology", "url": "https://www.pharmaceutical-technology.com/feed/", "type": "rss", "region": "United Kingdom", "category": "news", "isActive": true },
+  { "id": "drug-discovery-trends", "name": "Drug Discovery & Development", "url": "https://www.drugdiscoverytrends.com/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "clinicaltrialsarena", "name": "Clinical Trials Arena", "url": "https://www.clinicaltrialsarena.com/feed/", "type": "rss", "region": "United Kingdom", "category": "news", "isActive": true },
+  { "id": "statnews-pharma", "name": "STAT News (Pharma)", "url": "https://www.statnews.com/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": false, "notes": "Excluded: robots.txt explicitly disallows anthropic-ai and ClaudeBot. Also paywalled." },
+  { "id": "pharmexec", "name": "Pharmaceutical Executive", "url": "https://www.pharmexec.com/rss.xml", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "pharmavoice", "name": "PharmaVoice", "url": "https://www.pharmavoice.com/feeds/news/", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+  { "id": "contractpharma", "name": "Contract Pharma", "url": "https://www.contractpharma.com/feed/", "type": "rss", "region": "United States", "category": "news", "isActive": true },
+
+  { "id": "fda", "name": "U.S. Food & Drug Administration", "url": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml", "type": "rss", "region": "United States", "category": "regulator", "isActive": true },
+  { "id": "ema", "name": "European Medicines Agency", "url": "https://www.ema.europa.eu/en/news.xml", "type": "rss", "region": "European Union", "category": "regulator", "isActive": true },
+
+  { "id": "pmda", "name": "Pharmaceuticals and Medical Devices Agency (Japan)", "url": "https://www.pmda.go.jp/english/", "type": "html", "region": "Japan", "category": "regulator", "isActive": false, "notes": "No working RSS feed found yet - needs a best-effort HTML fetch implementation before activating." },
+  { "id": "health-canada", "name": "Health Canada", "url": "https://www.canada.ca/en/health-canada/services/drugs-health-products.html", "type": "html", "region": "Canada", "category": "regulator", "isActive": false, "notes": "Canada.ca news API (api.io.canada.ca) returned inconsistent/empty results in testing - needs further verification before activating." },
+  { "id": "tga", "name": "Therapeutic Goods Administration (Australia)", "url": "https://www.tga.gov.au/news", "type": "html", "region": "Australia", "category": "regulator", "isActive": false, "notes": "tga.gov.au was unreachable from this dev environment (connection timeout even on root domain) - verify reachability from your own network before activating." }
+]
