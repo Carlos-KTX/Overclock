@@ -85,13 +85,17 @@ function createConnection(): Client {
   return createClient({ url: `file:${dbPath}` });
 }
 
-async function ensureSchema(client: Client): Promise<void> {
+async function ensureSchema(client: Client, isRemote: boolean): Promise<void> {
   // WAL keeps one persistent -wal file instead of creating and deleting a
   // -journal file on every single write (SQLite's default rollback-journal
   // mode). On Windows, antivirus real-time scanning on hundreds of those
   // create/delete cycles turned a normally-fast ingestion run into one that
-  // took 6+ minutes. No-op against a remote Turso connection.
-  await client.execute("PRAGMA journal_mode = WAL");
+  // took 6+ minutes. Local file only - Turso's remote server rejects this
+  // PRAGMA outright (SQL_PARSE_ERROR), it doesn't just ignore it, and
+  // running it there broke every single request against the database.
+  if (!isRemote) {
+    await client.execute("PRAGMA journal_mode = WAL");
+  }
   for (const statement of SCHEMA_STATEMENTS) {
     await client.execute(statement);
   }
@@ -100,7 +104,7 @@ async function ensureSchema(client: Client): Promise<void> {
 export async function getDb(): Promise<Client> {
   if (!globalThis.__overclockDb) {
     globalThis.__overclockDb = createConnection();
-    globalThis.__overclockDbReady = ensureSchema(globalThis.__overclockDb);
+    globalThis.__overclockDbReady = ensureSchema(globalThis.__overclockDb, Boolean(process.env.TURSO_DATABASE_URL));
   }
   await globalThis.__overclockDbReady;
   return globalThis.__overclockDb;
