@@ -89,13 +89,20 @@ export default function Home() {
   async function handleRefresh() {
     setRefreshing(true);
     try {
-      await fetch("/api/ingest/run", { method: "POST" });
+      const runRes = await fetch("/api/ingest/run", { method: "POST" });
+      const runData = await runRes.json().catch(() => null);
+      if (!runRes.ok || runData?.ok === false) {
+        throw new Error(runData?.error ?? `Ingestion request failed (HTTP ${runRes.status}).`);
+      }
+
       const res = await fetch(`/api/releases?${query}`);
+      if (!res.ok) throw new Error(`Failed to reload releases (HTTP ${res.status}).`);
       const data = await res.json();
       setReleases(data.releases);
       setTotal(data.total);
-    } catch {
-      setError("Refresh failed.");
+      setError(null);
+    } catch (err) {
+      setError(`Refresh failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setRefreshing(false);
     }
