@@ -86,6 +86,12 @@ function createConnection(): Client {
 }
 
 async function ensureSchema(client: Client): Promise<void> {
+  // WAL keeps one persistent -wal file instead of creating and deleting a
+  // -journal file on every single write (SQLite's default rollback-journal
+  // mode). On Windows, antivirus real-time scanning on hundreds of those
+  // create/delete cycles turned a normally-fast ingestion run into one that
+  // took 6+ minutes. No-op against a remote Turso connection.
+  await client.execute("PRAGMA journal_mode = WAL");
   for (const statement of SCHEMA_STATEMENTS) {
     await client.execute(statement);
   }

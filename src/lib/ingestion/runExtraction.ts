@@ -17,9 +17,24 @@ export interface ExtractionSummary {
   irrelevant: number;
   extracted: number;
   errors: number;
+  remainingPending: number;
 }
 
-export async function runExtractionCycle(log: (msg: string) => void = () => {}): Promise<ExtractionSummary> {
+/**
+ * LLM calls have unpredictable latency, and a serverless function gets
+ * hard-killed at its timeout (no chance to persist a clean summary or log)
+ * once the deadline passes. Stop picking up new items with enough runway
+ * left to finish the in-flight one and return normally instead - anything
+ * left over stays 'pending' and is picked up by the next run.
+ *
+ * Defaults to effectively unbounded, since local CLI runs have no
+ * serverless time limit to respect. The API routes (which do) pass an
+ * explicit, conservative deadline instead of relying on this default.
+ */
+export async function runExtractionCycle(
+  log: (msg: string) => void = () => {},
+  deadline: number = Date.now() + 24 * 60 * 60 * 1000
+): Promise<ExtractionSummary> {
   const db = await getDb();
   const pendingResult = await db.execute(
     `SELECT id, source_id, source_url, title, excerpt, published_at FROM raw_items WHERE status = 'pending'`
@@ -28,9 +43,15 @@ export async function runExtractionCycle(log: (msg: string) => void = () => {}):
 
   log(`${pending.length} pending raw items.`);
 
-  const summary: ExtractionSummary = { skipped: 0, irrelevant: 0, extracted: 0, errors: 0 };
+  const summary: ExtractionSummary = { skipped: 0, irrelevant: 0, extracted: 0, errors: 0, remainingPending: 0 };
 
-  for (const item of pending) {
+  for (let i = 0; i < pending.length; i++) {
+    if (Date.now() > deadline) {
+      summary.remainingPending = pending.length - i;
+      log(`  time budget reached, stopping with ${summary.remainingPending} item(s) left pending for next run.`);
+      break;
+    }
+    const item = pending[i];
     if (!looksLikeProductRelease(item.title, item.excerpt ?? "")) {
       await db.execute({ sql: `UPDATE raw_items SET status = ? WHERE id = ?`, args: ["skipped", item.id] });
       summary.skipped++;

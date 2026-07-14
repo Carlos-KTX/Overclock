@@ -6,6 +6,7 @@ runExtractionCycle(console.log)
     console.log(
       `\nDone. ${summary.skipped} skipped (no signal), ${summary.irrelevant} irrelevant (LLM), ${summary.extracted} extracted, ${summary.errors} errors.`
     );
+    process.exit(0);
   })
   .catch((err) => {
     console.error(err);

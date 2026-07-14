@@ -3,6 +3,9 @@ import { runIngestionCycle } from "@/lib/ingestion/runIngestion";
 import { runExtractionCycle } from "@/lib/ingestion/runExtraction";
 
 export const runtime = "nodejs";
+// Declared for Vercel Pro/Enterprise; Hobby silently caps actual execution
+// at 60s regardless, which is why the extraction deadline below stays
+// conservative rather than trusting this value at runtime.
 export const maxDuration = 300;
 
 /**
@@ -23,10 +26,12 @@ export async function GET(request: NextRequest) {
 
   const logs: string[] = [];
   const log = (msg: string) => logs.push(msg);
+  // Conservative regardless of plan tier - see maxDuration comment above.
+  const deadline = Date.now() + 45_000;
 
   try {
     const ingestion = await runIngestionCycle(log);
-    const extraction = await runExtractionCycle(log);
+    const extraction = await runExtractionCycle(log, deadline);
     return NextResponse.json({ ok: true, ingestion, extraction, logs });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
