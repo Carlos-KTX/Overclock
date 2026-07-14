@@ -76,7 +76,11 @@ function normalizeDate(raw: string | undefined): string | null {
 
 export async function fetchHtmlListing(config: HtmlScrapeConfig): Promise<FeedItem[]> {
   const response = await fetch(config.baseUrl, {
-    headers: { "User-Agent": USER_AGENT },
+    headers: {
+      "User-Agent": USER_AGENT,
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    },
     signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) {
@@ -110,6 +114,19 @@ export async function fetchHtmlListing(config: HtmlScrapeConfig): Promise<FeedIt
 
     items.push({ title, link, excerpt, publishedAt });
   });
+
+  // Unlike an RSS feed (where 0 *new* items just means nothing changed
+  // since last time), a hand-tuned CSS selector matching 0 items on a page
+  // that always has real content when working is almost always a sign the
+  // scrape itself broke - a bot-challenge page instead of the real one, a
+  // geo/IP block, or the site's markup changing - not a real "no news"
+  // day. Throwing here (instead of silently returning []) surfaces that as
+  // a visible per-source error instead of a quiet, misleading zero.
+  if (items.length === 0) {
+    throw new Error(
+      `Matched 0 items for selector "${config.itemSelector}" (HTTP ${response.status}, ${html.length} bytes received) - the scrape likely broke rather than the page having no news`
+    );
+  }
 
   return items;
 }
