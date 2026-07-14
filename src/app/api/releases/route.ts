@@ -23,8 +23,11 @@ export async function GET(request: NextRequest) {
   const regions = params.getAll("region").filter(isRegion);
   const therapeuticLines = params.getAll("therapeuticLine").filter(isTherapeuticLine);
   const releaseTypes = params.getAll("releaseType").filter(isReleaseType);
-  const limit = Math.min(Number(params.get("limit")) || 50, 200);
+  // Default limit matches the cap - previously defaulted to 50 with no way
+  // for the frontend to page past it, silently hiding anything older.
+  const limit = Math.min(Number(params.get("limit")) || 200, 500);
   const offset = Number(params.get("offset")) || 0;
+  const days = Number(params.get("days")) || null;
 
   const db = await getDb();
   const conditions: string[] = ["duplicate_of_release_id IS NULL"];
@@ -41,6 +44,11 @@ export async function GET(request: NextRequest) {
   if (releaseTypes.length) {
     conditions.push(`release_type IN (${releaseTypes.map(() => "?").join(",")})`);
     args.push(...releaseTypes);
+  }
+  if (days) {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    conditions.push(`COALESCE(published_date, created_at) >= ?`);
+    args.push(cutoff);
   }
 
   const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";

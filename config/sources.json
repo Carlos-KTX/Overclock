@@ -49,7 +49,7 @@
     "region": "Mexico",
     "category": "regulator",
     "isActive": true,
-    "notes": "No dedicated listing page was found (gob.mx/cofepris/articulos 404s), so this scrapes the homepage's press-release widget instead - only ~5 recent items per fetch. The secondary (non-featured) items show day+month but no year, so published_date is null for those; they still get a real date from fetched_at.",
+    "notes": "No dedicated listing page was found (gob.mx/cofepris/articulos 404s), so this scrapes the homepage's press-release widget instead - only ~5 recent items per fetch. The secondary (non-featured) items show day+month but no year, so published_date is null for those; they still get a real date from fetched_at. Confirmed working from residential/dev networks, but returns a ~1.8KB HTTP 200 (vs the real ~880KB page) when fetched from Vercel's production deployment - almost certainly gob.mx treating the datacenter IP differently (bot-challenge/blank page). Left active since it's harmless to keep trying and may start working if that changes; last_error on the source will show '0 items matched' when it's happening.",
     "htmlScrapeConfig": {
       "itemSelector": "a.news-featured-card, a.news-list-item",
       "linkSelector": "self",

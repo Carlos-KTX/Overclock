@@ -3,6 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { REGIONS, THERAPEUTIC_LINES, RELEASE_TYPES } from "@/lib/constants";
 import { MultiSelectDropdown } from "./components/MultiSelectDropdown";
+import { SingleSelectDropdown } from "./components/SingleSelectDropdown";
+
+const DATE_RANGE_OPTIONS = [
+  { label: "All time", value: "all" },
+  { label: "Last 7 days", value: "7" },
+  { label: "Last 30 days", value: "30" },
+  { label: "Last 90 days", value: "90" },
+  { label: "Last 12 months", value: "365" },
+];
+const DEFAULT_DATE_RANGE = "all";
 
 interface Release {
   id: number;
@@ -57,6 +67,7 @@ export default function Home() {
   const [regions, setRegions] = useState<string[]>([]);
   const [therapeuticLines, setTherapeuticLines] = useState<string[]>([]);
   const [releaseTypes, setReleaseTypes] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState<string>(DEFAULT_DATE_RANGE);
   const [releases, setReleases] = useState<Release[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -70,8 +81,9 @@ export default function Home() {
     regions.forEach((r) => params.append("region", r));
     therapeuticLines.forEach((t) => params.append("therapeuticLine", t));
     releaseTypes.forEach((t) => params.append("releaseType", t));
+    if (dateRange !== DEFAULT_DATE_RANGE) params.set("days", dateRange);
     return params.toString();
-  }, [regions, therapeuticLines, releaseTypes]);
+  }, [regions, therapeuticLines, releaseTypes, dateRange]);
 
   useEffect(() => {
     setLoading(true);
@@ -122,7 +134,8 @@ export default function Home() {
     [releases, sortColumn, sortDirection]
   );
 
-  const hasActiveFilters = regions.length + therapeuticLines.length + releaseTypes.length > 0;
+  const hasActiveFilters =
+    regions.length + therapeuticLines.length + releaseTypes.length > 0 || dateRange !== DEFAULT_DATE_RANGE;
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-900">
@@ -157,12 +170,20 @@ export default function Home() {
           selected={therapeuticLines}
           onChange={setTherapeuticLines}
         />
+        <SingleSelectDropdown
+          label="Date Range"
+          options={DATE_RANGE_OPTIONS}
+          selected={dateRange}
+          onChange={setDateRange}
+          defaultValue={DEFAULT_DATE_RANGE}
+        />
         {hasActiveFilters && (
           <button
             onClick={() => {
               setRegions([]);
               setTherapeuticLines([]);
               setReleaseTypes([]);
+              setDateRange(DEFAULT_DATE_RANGE);
             }}
             className="text-xs font-medium text-slate-500 hover:text-slate-900 hover:underline"
           >
