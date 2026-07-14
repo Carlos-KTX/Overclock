@@ -103,8 +103,18 @@ async function ensureSchema(client: Client, isRemote: boolean): Promise<void> {
 
 export async function getDb(): Promise<Client> {
   if (!globalThis.__overclockDb) {
-    globalThis.__overclockDb = createConnection();
-    globalThis.__overclockDbReady = ensureSchema(globalThis.__overclockDb, Boolean(process.env.TURSO_DATABASE_URL));
+    const client = createConnection();
+    globalThis.__overclockDb = client;
+    globalThis.__overclockDbReady = ensureSchema(client, Boolean(process.env.TURSO_DATABASE_URL)).catch((err) => {
+      // If setup fails, don't leave a permanently-rejected promise cached on
+      // the module-level global - a warm serverless instance would otherwise
+      // keep replaying that same failure forever, even after a fix ships,
+      // until the instance happens to recycle. Clear the cache so the next
+      // call retries from scratch instead.
+      globalThis.__overclockDb = undefined;
+      globalThis.__overclockDbReady = undefined;
+      throw err;
+    });
   }
   await globalThis.__overclockDbReady;
   return globalThis.__overclockDb;
