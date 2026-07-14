@@ -5,6 +5,12 @@ export const REGIONS = [
   "Japan",
   "Canada",
   "Australia",
+  "Mexico",
+  "Brazil",
+  "Argentina",
+  "Chile",
+  "Colombia",
+  "Peru",
   "Global/Other",
 ] as const;
 

@@ -46,7 +46,9 @@ export async function fetchRssFeed(url: string): Promise<FeedItem[]> {
   return (feed.items ?? [])
     .map((item) => ({
       title: extractText(item.title),
-      link: typeof item.link === "string" ? item.link.trim() : null,
+      // Some outlets (e.g. ANVISA) omit <link> and rely on <guid> as the
+      // permalink instead, which is valid per the RSS spec.
+      link: typeof item.link === "string" ? item.link.trim() : extractText(item.guid),
       excerpt: (item.contentSnippet ?? item.summary ?? item.content ?? "")
         .toString()
         .trim()
