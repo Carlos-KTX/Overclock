@@ -1,6 +1,7 @@
 import { getDb } from "../db";
 import { loadActiveSources } from "./sources";
 import { fetchRssFeed } from "./fetchFeed";
+import { fetchHtmlListing } from "./fetchHtmlListing";
 
 const POLITENESS_DELAY_MS = 1500;
 
@@ -16,7 +17,7 @@ export interface IngestionSummary {
 
 export async function runIngestionCycle(log: (msg: string) => void = () => {}): Promise<IngestionSummary> {
   const db = await getDb();
-  const sources = loadActiveSources().filter((s) => s.type === "rss");
+  const sources = loadActiveSources().filter((s) => s.type === "rss" || s.type === "html");
 
   async function upsertSource(source: (typeof sources)[number], lastFetchedAt: string | null, lastError: string | null) {
     await db.execute({
@@ -40,7 +41,10 @@ export async function runIngestionCycle(log: (msg: string) => void = () => {}): 
     const now = new Date().toISOString();
     try {
       log(`Fetching ${source.name} (${source.url})...`);
-      const items = await fetchRssFeed(source.url);
+      const items =
+        source.type === "html" && source.htmlScrapeConfig
+          ? await fetchHtmlListing(source.htmlScrapeConfig)
+          : await fetchRssFeed(source.url);
       let inserted = 0;
       for (const item of items) {
         const result = await db.execute({

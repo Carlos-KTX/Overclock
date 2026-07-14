@@ -21,11 +21,65 @@
   { "id": "anvisa", "name": "ANVISA (Brazil)", "url": "https://www.gov.br/anvisa/pt-br/rss.xml", "type": "rss", "region": "Brazil", "category": "regulator", "isActive": true },
   { "id": "isp-chile", "name": "ISP - Instituto de Salud Pública (Chile)", "url": "https://www.ispch.cl/feed/", "type": "rss", "region": "Chile", "category": "regulator", "isActive": true },
   { "id": "consultorsalud", "name": "ConsultorSalud (Colombia)", "url": "https://consultorsalud.com/feed/", "type": "rss", "region": "Colombia", "category": "news", "isActive": true, "notes": "Colombian health-industry news portal; covers INVIMA approvals and LatAm pharma policy. No dedicated INVIMA feed was found, so this is the best available Colombia signal." },
+  { "id": "biotuesdays", "name": "BioTuesdays (Canada)", "url": "https://www.biotuesdays.com/feed/", "type": "rss", "region": "Canada", "category": "news", "isActive": true, "notes": "Canadian biotech/pharma trade press. Substitutes for Health Canada, whose actual news listing is not scrapable (see health-canada entry)." },
+
+  {
+    "id": "anmat",
+    "name": "ANMAT (Argentina)",
+    "url": "https://www.argentina.gob.ar/anmat/noticias",
+    "type": "html",
+    "region": "Argentina",
+    "category": "regulator",
+    "isActive": true,
+    "htmlScrapeConfig": {
+      "itemSelector": "a.panel.panel-default",
+      "linkSelector": "self",
+      "titleSelector": "h3",
+      "dateSelector": "time",
+      "dateAttr": "datetime",
+      "excerptSelector": ".text-muted",
+      "baseUrl": "https://www.argentina.gob.ar/anmat/noticias"
+    }
+  },
+  {
+    "id": "cofepris",
+    "name": "COFEPRIS (Mexico)",
+    "url": "https://www.gob.mx/cofepris",
+    "type": "html",
+    "region": "Mexico",
+    "category": "regulator",
+    "isActive": true,
+    "notes": "No dedicated listing page was found (gob.mx/cofepris/articulos 404s), so this scrapes the homepage's press-release widget instead - only ~5 recent items per fetch. The secondary (non-featured) items show day+month but no year, so published_date is null for those; they still get a real date from fetched_at.",
+    "htmlScrapeConfig": {
+      "itemSelector": "a.news-featured-card, a.news-list-item",
+      "linkSelector": "self",
+      "titleSelector": "h4",
+      "dateSelector": ".date-text",
+      "excerptSelector": ".news-excerpt",
+      "baseUrl": "https://www.gob.mx/cofepris"
+    }
+  },
+  {
+    "id": "digemid",
+    "name": "DIGEMID (Peru)",
+    "url": "https://www.digemid.minsa.gob.pe/webDigemid/publicaciones/notas/nota-prensa/",
+    "type": "html",
+    "region": "Peru",
+    "category": "regulator",
+    "isActive": true,
+    "notes": "gob.pe's institutional page for DIGEMID 404s; digemid.minsa.gob.pe is DIGEMID's own WordPress site and has a working press-notes listing instead.",
+    "htmlScrapeConfig": {
+      "itemSelector": "article.post",
+      "linkSelector": "h2.entry-title a",
+      "titleSelector": "h2.entry-title a",
+      "dateSelector": "time",
+      "dateAttr": "datetime",
+      "excerptSelector": "p.post-excerpt",
+      "baseUrl": "https://www.digemid.minsa.gob.pe/webDigemid/publicaciones/notas/nota-prensa/"
+    }
+  },
 
   { "id": "pmda", "name": "Pharmaceuticals and Medical Devices Agency (Japan)", "url": "https://www.pmda.go.jp/english/", "type": "html", "region": "Japan", "category": "regulator", "isActive": false, "notes": "No working RSS feed found yet - needs a best-effort HTML fetch implementation before activating." },
-  { "id": "health-canada", "name": "Health Canada", "url": "https://www.canada.ca/en/health-canada/services/drugs-health-products.html", "type": "html", "region": "Canada", "category": "regulator", "isActive": false, "notes": "No RSS feed found. recalls-rappels.canada.ca (Drupal) exposes no discoverable feed endpoint; the Canada.ca news API (api.io.canada.ca) returns inconsistent/empty results when filtered by department. CDA-AMC (formerly CADTH, Canada's drug HTA agency) blocks non-browser requests with HTTP 403 on /rss.xml and /feed. Needs a best-effort HTML fetch implementation, or a non-government Canadian pharma trade outlet as a substitute." },
-  { "id": "tga", "name": "Therapeutic Goods Administration (Australia)", "url": "https://www.tga.gov.au/news", "type": "html", "region": "Australia", "category": "regulator", "isActive": false, "notes": "tga.gov.au was unreachable from this dev environment (connection timeout even on root domain) - verify reachability from your own network before activating." },
-  { "id": "cofepris", "name": "COFEPRIS (Mexico)", "url": "https://www.gob.mx/cofepris", "type": "html", "region": "Mexico", "category": "regulator", "isActive": false, "notes": "No usable RSS feed - gob.mx/cofepris/rss returns a bot-detection challenge page, and the archive prensa.rss endpoint 500s. Needs a best-effort HTML fetch implementation, or a Mexican pharma trade outlet as a substitute." },
-  { "id": "anmat", "name": "ANMAT (Argentina)", "url": "https://www.argentina.gob.ar/anmat", "type": "html", "region": "Argentina", "category": "regulator", "isActive": false, "notes": "No ANMAT-specific feed found. argentina.gob.ar/rss.xml exists but is the whole government portal's feed (includes unrelated content like wanted-persons notices) - too noisy to use as-is." },
-  { "id": "digemid", "name": "DIGEMID (Peru)", "url": "https://www.gob.pe/institucion/digemid", "type": "html", "region": "Peru", "category": "regulator", "isActive": false, "notes": "No working RSS feed found at any tested path." }
+  { "id": "health-canada", "name": "Health Canada", "url": "https://www.canada.ca/en/health-canada/services/drugs-health-products.html", "type": "html", "region": "Canada", "category": "regulator", "isActive": false, "notes": "Not scrapable: www.canada.ca's news pages render via client-side JS with an empty static HTML body, and the domain is fronted by bot management that stalls/blocks non-browser HTTP clients and hangs even a real headless browser. recalls-rappels.canada.ca is reachable but only covers recalls/safety alerts (the opposite signal from approvals). Using BioTuesdays as a substitute instead (see biotuesdays entry)." },
+  { "id": "tga", "name": "Therapeutic Goods Administration (Australia)", "url": "https://www.tga.gov.au/news", "type": "html", "region": "Australia", "category": "regulator", "isActive": false, "notes": "Correction: tga.gov.au IS reachable (earlier 'unreachable' verdict was a curl-on-Windows/TLS artifact, not a real block - confirmed via Node fetch). Still needs a real htmlScrapeConfig (selectors not yet written) before activating." }
 ]
